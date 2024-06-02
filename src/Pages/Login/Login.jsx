@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.svg"
 import loginImg from "../../assets/images/login/login.svg"
 import facebook from "../../assets/icons/Facebook.png"
@@ -6,11 +6,16 @@ import linkedIn from "../../assets/icons/Group 25.png"
 import google from "../../assets/icons/Google.png"
 import { useContext } from "react";
 import { AuthContext } from "../../Provider/AuthProvider";
+import axios from "axios";
 
 const Login = () => {
     const { signIn } = useContext(AuthContext);
+    const location = useLocation();
+    console.log(location);
+    const navigate = useNavigate();
 
     const navItems = <>
+        <li><Link to={"/"}>Home</Link></li>
         <li><Link to={"/order"}>Order</Link></li>
         <li><Link to={"/orderReview"}>Order Review</Link></li>
         <li><Link to={"/managementInventory"}>Management Inventory</Link></li>
@@ -29,7 +34,20 @@ const Login = () => {
             .then(result => {
                 if (result.user) {
                     console.log(result.user);
-                    console.log("User signed in successfully!")
+                    const user = { email };
+                    // console.log("User signed in successfully!")
+
+                    // get access token-----
+                    axios.post("http://localhost:5000/jwt", user, {withCredentials: true})
+                        .then(res => {
+                            console.log(res.data.success)
+                            if (res.data.success) {
+                                navigate(location?.state ? location?.state : "/");
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        })
                 }
             })
             .catch(error => {
